@@ -27,11 +27,13 @@ mongoose
   })
   .catch(err => console.log(err));
 
+  
+app.use("/", apiRouter);
+
 app.listen(PORT, () => {
   console.log(`API listening on PORT ${PORT} `)
 })
 
-app.use("/", apiRouter);
 
 app.get('/about', (req, res) => {
   res.send('This is my about route..... ')
