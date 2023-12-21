@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const apiRouter = require('./routes');
 require('dotenv').config();
 
 const app = express();
@@ -26,9 +25,9 @@ mongoose
     console.log(`Successfully connect to database`);
   })
   .catch(err => console.log(err));
-
+/* 
 app.use('/covers', express.static('covers'));
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static('uploads')); */
 
 app.listen(PORT, () => {
   console.log(`API listening on PORT ${PORT} `);
