@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const apiRouter = require('./routes/index');
+const errorHandler = require('./middleware/errorHandler');
 require('dotenv').config();
 
 const app = express();
@@ -34,6 +35,8 @@ app.use(cors()); // Add this line
 // Other middleware and routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(errorHandler);
 
 app.use("/api/v1", apiRouter);
 
