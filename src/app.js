@@ -29,6 +29,8 @@ mongoose
 app.use('/covers', express.static('covers'));
 app.use('/uploads', express.static('uploads')); */
 
+app.use("/api/v1", apiRouter);
+
 app.listen(PORT, () => {
   console.log(`API listening on PORT ${PORT} `);
 });
