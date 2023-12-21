@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const apiRouter = require('./routes/index')
+const cors = require('cors');
+const apiRouter = require('./routes/index');
 require('dotenv').config();
 
 const app = express();
@@ -27,6 +28,13 @@ mongoose
   })
   .catch(err => console.log(err));
 
+// Use CORS middleware
+app.use(cors()); // Add this line
+
+// Other middleware and routes
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use("/api/v1", apiRouter);
 
 app.listen(PORT, () => {
@@ -35,10 +43,6 @@ app.listen(PORT, () => {
 
 app.get('/', (req, res) => {
   res.send('Hey this is my API running 🥳');
-});
-
-app.get('/about', (req, res) => {
-  res.send('This is my about route..... ');
 });
 
 // Export the Express API
