@@ -51,7 +51,13 @@ exports.addAlbum = async (req, res) => {
 // READ (obtenir tous les albums)
 exports.getAllAlbums = async (req, res) => {
   try {
-    const albums = await Album.find().populate('artist').populate('songs');
+    const albums = await Album.find().populate({
+      path: 'songs',
+      select: 'title',
+    }).populate({
+      path: 'artist',
+      select: 'name',
+    });
     res.json(albums);
   } catch (error) {
     console.error('Erreur lors de la récupération des albums :', error);

@@ -1,14 +1,14 @@
 const fs = require('fs').promises;
 const Song = require('../models/song.model');
 const upload = require('../middleware/multer');
-const { importSongFromFile } = require('../utils/fileCreator');
+const {importSongFromFile} = require('../utils/fileCreator');
 
 exports.addSong = async (req, res, next) => {
   upload(req, res, async err => {
     if (err) {
       console.error('Multer error:', err);
-      return res.status(500).json({ message: 'Error during file upload.' });
-   }
+      return res.status(500).json({message: 'Error during file upload.'});
+    }
     try {
       console.log('Received a request to add a song:', req.body);
 
@@ -29,7 +29,7 @@ exports.getSongFile = async (req, res) => {
   try {
     const song = await Song.findById(req.params.id);
     console.log('Sending file:', song.audio);
-    res.sendFile(song.audio);
+    res.sendFile(song.audio, {root: __dirname});
   } catch (error) {
     res.status(500).json({message: 'Error: ' + error.message});
   }
@@ -39,7 +39,7 @@ exports.getSongCover = async (req, res) => {
   try {
     const song = await Song.findById(req.params.id);
     console.log('Sending file:', song.albumCover);
-    res.sendFile(song.albumCover, { root: __dirname });
+    res.sendFile(song.albumCover, {root: __dirname});
   } catch (error) {
     res.status(500).json({message: 'Error: ' + error.message});
   }
@@ -48,17 +48,31 @@ exports.getSongCover = async (req, res) => {
 exports.getSongCoverPath = async (req, res) => {
   try {
     const song = await Song.findById(req.params.id);
-    res.json({ path: song.albumCover });
+    res.json({path: song.albumCover});
   } catch (error) {
-    res.status(500).json({ message: 'Error: ' + error.message });
+    res.status(500).json({message: 'Error: ' + error.message});
   }
 };
 
 // GET: Récupérer tous les sons
-exports.getAllSongs = (req, res) => {
-  Song.find()
-    .then(songs => res.json(songs))
-    .catch(err => res.status(400).json('Error: ' + err));
+exports.getAllSongs = async (req, res) => {
+  try {
+    const songs = await Song.find()
+      .populate({
+        path: 'artist',
+        select: 'name',
+      })
+      .populate({
+        path: 'album',
+        select: 'title',
+      });
+    res.json(songs);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des songs :', error);
+    res
+      .status(500)
+      .json({message: 'Erreur lors de la récupération des songs.'});
+  }
 };
 
 exports.filterSongs = async (req, res) => {

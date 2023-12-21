@@ -3,7 +3,7 @@ const router = express.Router();
 const artistController = require('../controllers/artist.controller');
 const authMiddleware = require('../middleware/authMiddleware');
 
-router.get('/', artistController.getArtists);
+router.get('/', artistController.getAllArtists);
 router.get('/:id', artistController.getArtistById);
 router.post('/', authMiddleware, artistController.addArtist);
 router.post('/file', authMiddleware, artistController.addArtistFromFile);

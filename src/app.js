@@ -30,15 +30,20 @@ mongoose
   .catch(err => console.log(err));
 
 // Use CORS middleware
-app.use(cors()); // Add this line
+const corsOptions = {
+  origin: 'http://localhost:3000', // Change this to your frontend domain
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 // Other middleware and routes
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 app.use(errorHandler);
 
-app.use("/api/v1", apiRouter);
+app.use('/api/v1', apiRouter);
 
 app.use('/covers', express.static('covers'));
 app.use('/uploads', express.static('uploads'));

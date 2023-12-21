@@ -79,7 +79,6 @@ async function createAlbumFromFile(filePath) {
     const album = new Album({
       title: metadata.common.album,
       artist: existingArtist._id,
-      artistName: metadata.common.artist,
       releaseDate: metadata.common.year,
       songs: [],
       albumCover: urlFriendlyAlbumCoverPath,
@@ -113,7 +112,7 @@ async function importSongFromFile(filePath) {
       }
   
       console.log('Checking for album...');
-      let existingAlbum = await Album.findOne({name: album});
+      let existingAlbum = await Album.findOne({title: album});
   
       if (!existingAlbum) {
         const albumId = await createAlbumFromFile(filePath);
@@ -121,21 +120,20 @@ async function importSongFromFile(filePath) {
       }
   
       // If the artist didn't exist before this, it's already been created with the createAlbumFromFile function
-      let existingArtist = await Artist.findOne({artistName: artist});
+      let existingArtist = await Artist.findOne({name: artist});
 
       if (!existingArtist) {
         const artistId = await createArtistFromFile(filePath);
         existingArtist = await Artist.findById(artistId);
       }
  
+      const urlFriendlyAudioPath = filePath.replace(/\\/g, '/');
       const newSong = new Song({
         title,
         artist: existingArtist._id,
-        artistName: artist,
         album: existingAlbum._id,
-        albumTitle: album,
         albumCover: existingAlbum.albumCover,
-        audio: filePath,
+        audio: urlFriendlyAudioPath,
         duration: metadata.format.duration,
       });
   
