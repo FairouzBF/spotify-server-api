@@ -1,10 +1,10 @@
-const express = require('express')
+const express = require('express');
 const mongoose = require('mongoose');
 const apiRouter = require('./routes');
 require('dotenv').config();
 
-const app = express()
-const PORT = 4000
+const app = express();
+const PORT = 4000;
 
 // Log environment variables
 console.log('MONGODB_USER:', process.env.MONGODB_USER);
@@ -19,25 +19,28 @@ mongoose
     {
       serverSelectionTimeoutMS: 50000,
       connectTimeoutMS: 30000, // 30 seconds
-      socketTimeoutMS: 45000,  // 45 seconds
-    }
+      socketTimeoutMS: 45000, // 45 seconds
+    },
   )
   .then(() => {
     console.log(`Successfully connect to database`);
   })
   .catch(err => console.log(err));
 
-  
-app.use("/", apiRouter);
+app.use('/covers', express.static('covers'));
+app.use('/uploads', express.static('uploads'));
 
 app.listen(PORT, () => {
-  console.log(`API listening on PORT ${PORT} `)
-})
+  console.log(`API listening on PORT ${PORT} `);
+});
 
+app.get('/', (req, res) => {
+  res.send('Hey this is my API running 🥳');
+});
 
 app.get('/about', (req, res) => {
-  res.send('This is my about route..... ')
-})
+  res.send('This is my about route..... ');
+});
 
 // Export the Express API
-module.exports = app
+module.exports = app;
