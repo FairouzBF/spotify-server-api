@@ -40,6 +40,9 @@ app.use(errorHandler);
 
 app.use("/api/v1", apiRouter);
 
+app.use('/covers', express.static('covers'));
+app.use('/uploads', express.static('uploads'));
+
 app.listen(PORT, () => {
   console.log(`API listening on PORT ${PORT} `);
 });
