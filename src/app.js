@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const apiRouter = require('./routes/index')
 require('dotenv').config();
 
 const app = express();
@@ -25,6 +26,8 @@ mongoose
     console.log(`Successfully connect to database`);
   })
   .catch(err => console.log(err));
+
+app.use("/api/v1", apiRouter);
 
 app.listen(PORT, () => {
   console.log(`API listening on PORT ${PORT} `);
