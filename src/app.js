@@ -31,7 +31,7 @@ mongoose
 
 // Use CORS middleware
 const corsOptions = {
-  origin: 'http://localhost:3000', // Change this to your frontend domain
+  origin: 'dev-cloud-backoffice-spotify.vercel.app', // Change this to your frontend domain
   credentials: true,
 };
 
