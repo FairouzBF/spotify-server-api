@@ -32,7 +32,7 @@ mongoose
 
 // Use CORS middleware
 const corsOptions = {
-  origin: CORS_ORIGIN, // Change this to your frontend domain
+  origin: process.env.CORS_ORIGIN, // Change this to your frontend domain
   credentials: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
