@@ -31,10 +31,11 @@ mongoose
 
 // Use CORS middleware
 const corsOptions = {
-  origin: 'dev-cloud-backoffice-spotify.vercel.app', // Change this to your frontend domain
+  origin: 'https://dev-cloud-backoffice-spotify.vercel.app', // Change this to your frontend domain
   credentials: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
+  optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
