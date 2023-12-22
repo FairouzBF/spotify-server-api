@@ -13,6 +13,7 @@ console.log('MONGODB_USER:', process.env.MONGODB_USER);
 console.log('MONGODB_PASSWORD:', process.env.MONGODB_PASSWORD);
 console.log('MONGODB_CLUSTER:', process.env.MONGODB_CLUSTER);
 console.log('PORT:', process.env.PORT);
+console.log('CORS_ORIGIN:', process.env.CORS_ORIGIN);
 
 mongoose.set('strictQuery', false);
 mongoose
@@ -31,7 +32,7 @@ mongoose
 
 // Use CORS middleware
 const corsOptions = {
-  origin: 'https://dev-cloud-backoffice-spotify.vercel.app', // Change this to your frontend domain
+  origin: CORS_ORIGIN, // Change this to your frontend domain
   credentials: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
