@@ -30,15 +30,17 @@ mongoose
   })
   .catch(err => console.log(err));
 
+
+
 // Use CORS middleware
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN, // Change this to your frontend domain
+  origin: 'http://localhost:3000',
   credentials: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
   optionsSuccessStatus: 204,
 };
-
+app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
 // Other middleware and routes
