@@ -108,13 +108,14 @@ exports.deleteAlbum = async (req, res) => {
     // Store the linked songs
     const linkedSongs = album.songs;
 
-    // Delete the album from the database
-    const deletedAlbum = await Album.findByIdAndDelete(req.params.id);
-
     // Delete the linked songs
     if (linkedSongs && linkedSongs.length > 0) {
       await Song.deleteMany({ _id: { $in: linkedSongs } });
     }
+
+    // Delete the album from the database
+    const deletedAlbum = await Album.findByIdAndDelete(req.params.id);
+    console.log('Album deleted succesfully:', deletedAlbum);
 
     res.json(deletedAlbum);
   } catch (error) {

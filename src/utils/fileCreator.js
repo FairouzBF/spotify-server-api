@@ -145,6 +145,7 @@ async function importSongFromFile(filePath) {
       existingArtist.songs.push(savedSong._id);
       await existingArtist.save();
       console.log('Song linked to artist successfully!');
+      return { message: 'Song added successfully', songId: savedSong._id };
     } catch (error) {
       console.error(`Error creating album from file ${filePath}:`, error.message);
       throw error;

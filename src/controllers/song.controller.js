@@ -13,9 +13,9 @@ exports.addSong = async (req, res, next) => {
       console.log('Received a request to add a song:', req.body);
 
       // Use the importSongFromFile function to handle the song import
-      await importSongFromFile(req.file.path);
+      const addedSong = await importSongFromFile(req.file.path);
 
-      res.status(201).json({message: 'Song added successfully!'});
+      res.status(201).json(addedSong);
     } catch (error) {
       console.error('Error while adding a song:', error);
       await fs.unlink(req.file.path);
@@ -120,6 +120,6 @@ exports.editSong = (req, res) => {
 // DELETE: Supprimer un son par son ID
 exports.deleteSong = (req, res) => {
   Song.findByIdAndDelete(req.params.id)
-    .then(() => res.json('Song deleted.'))
+    .then((song) => res.json("Song deleted successfully: ", song.title))
     .catch(err => res.status(400).json('Error: ' + err));
 };
