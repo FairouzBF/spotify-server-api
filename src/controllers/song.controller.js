@@ -3,28 +3,6 @@ const Song = require('../models/song.model');
 const upload = require('../middleware/multer');
 const {importSongFromFile} = require('../utils/fileCreator');
 
-/* exports.addSong = async (req, res, next) => {
-  upload(req, res, async err => {
-    if (err) {
-      console.error('Multer error:', err);
-      return res.status(500).json({message: 'Error during file upload.'});
-    }
-    try {
-      console.log('Received a request to add a song:', req.body);
-
-      // Use the importSongFromFile function to handle the song import
-      const addedSong = await importSongFromFile(req.file.path);
-
-      res.status(201).json(addedSong);
-    } catch (error) {
-      console.error('Error while adding a song:', error);
-      await fs.unlink(req.file.path);
-      console.error(error);
-      res.status(500).json({message: "Erreur lors de l'ajout de la chanson."});
-    }
-  });
-}; */
-
 exports.addSong = async (req, res, next) => {
   upload(req, res, async (err) => {
     if (err) {
