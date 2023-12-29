@@ -1,3 +1,5 @@
+const fs = require('fs').promises;
+
 const Artist = require('../models/artist.model');
 const Album = require('../models/album.model');
 const Song = require('../models/song.model');
@@ -91,23 +93,33 @@ exports.deleteArtist = async (req, res) => {
     // Store the linked albums and songs
     const linkedAlbums = artist.albums;
 
-    // Delete the artist from the database
-    const deletedArtist = await Artist.findByIdAndDelete(req.params.id);
-
     // Delete the linked albums and their songs
     if (linkedAlbums && linkedAlbums.length > 0) {
       // Find and store the linked songs of each album
-      const linkedSongs = await Song.find({album: {$in: linkedAlbums}});
+      const linkedSongs = await Song.find({ album: { $in: linkedAlbums } });
 
-      // Delete the linked albums
-      await Album.deleteMany({_id: {$in: linkedAlbums}});
-
-      // Delete the linked songs
       if (linkedSongs && linkedSongs.length > 0) {
-        await Song.deleteMany({_id: {$in: linkedSongs.map(song => song._id)}});
+        for (const song of linkedSongs) {
+          // Delete the audio file
+          await fs.unlink(song.audio);
+        }
+        await Song.deleteMany({ _id: { $in: linkedSongs.map(song => song._id) } });
       }
-    }
 
+      // Delete the linked albums and their covers
+      const albumsToDelete = await Album.find({ _id: { $in: linkedAlbums } });
+      for (const album of albumsToDelete) {
+        // Delete the album cover
+        if (album.albumCover) {
+          await fs.unlink(album.albumCover);
+        }
+      }
+      await Album.deleteMany({ _id: { $in: linkedAlbums } });
+    }
+    
+    // Delete the artist from the database
+    const deletedArtist = await Artist.findByIdAndDelete(req.params.id);
+    console.log('Artist deleted succesfully:', deletedArtist);
     res.json(deletedArtist);
   } catch (error) {
     console.error('Error while deleting an artist:', error);

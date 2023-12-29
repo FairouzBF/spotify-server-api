@@ -118,8 +118,24 @@ exports.editSong = (req, res) => {
 };
 
 // DELETE: Supprimer un son par son ID
-exports.deleteSong = (req, res) => {
-  Song.findByIdAndDelete(req.params.id)
-    .then((song) => res.json("Song deleted successfully: ", song.title))
-    .catch(err => res.status(400).json('Error: ' + err));
+exports.deleteSong = async (req, res) => {
+  try {
+    // Find the song to get its file path
+    const song = await Song.findById(req.params.id);
+    
+    if (!song) {
+      return res.status(404).json({ message: 'Song not found' });
+    }
+
+    // Delete the associated file
+    await fs.unlink(song.audio);
+
+    // Delete the song from the database
+    await Song.findByIdAndDelete(req.params.id);
+
+    res.json({ message: 'Song deleted successfully: ', deletedSongTitle: song.title });
+  } catch (err) {
+    console.error('Error deleting song:', err);
+    res.status(500).json({ message: 'Error deleting song', error: err.message });
+  }
 };

@@ -99,58 +99,58 @@ async function createAlbumFromFile(filePath) {
 }
 
 async function importSongFromFile(filePath) {
-    try {
-      const metadata = await mm.parseFile(filePath);
-      console.log('Reading metadata...', metadata.common);
+  try {
+    const metadata = await mm.parseFile(filePath);
+    console.log('Reading metadata...', metadata.common);
 
-      const {title, artist, album} = metadata.common;
-      const existingSong = await Song.findOne({title: title});
+    const {title, artist, album} = metadata.common;
+    const existingSong = await Song.findOne({title: title});
 
-      if (existingSong) {
-        console.error('Song already exists:', existingSong);
-        return { message: 'Song already exists', existingSongId: existingSong._id };
-      }
-  
-      console.log('Checking for album...');
-      let existingAlbum = await Album.findOne({title: album});
-  
-      if (!existingAlbum) {
-        const albumId = await createAlbumFromFile(filePath);
-        existingAlbum = await Album.findById(albumId);
-      }
-  
-      // If the artist didn't exist before this, it's already been created with the createAlbumFromFile function
-      let existingArtist = await Artist.findOne({name: artist});
-
-      if (!existingArtist) {
-        const artistId = await createArtistFromFile(filePath);
-        existingArtist = await Artist.findById(artistId);
-      }
- 
-      const urlFriendlyAudioPath = filePath.replace(/\\/g, '/');
-      const newSong = new Song({
-        title,
-        artist: existingArtist._id,
-        album: existingAlbum._id,
-        albumCover: existingAlbum.albumCover,
-        audio: urlFriendlyAudioPath,
-        duration: metadata.format.duration,
-      });
-  
-      const savedSong = await newSong.save();
-  
-      existingAlbum.songs.push(savedSong._id);
-      await existingAlbum.save();
-      console.log('Song linked to album successfully!');
-      existingArtist.songs.push(savedSong._id);
-      await existingArtist.save();
-      console.log('Song linked to artist successfully!');
-      return { message: 'Song added successfully', songId: savedSong._id };
-    } catch (error) {
-      console.error(`Error creating album from file ${filePath}:`, error.message);
-      throw error;
+    if (existingSong) {
+      console.error('Song already exists:', existingSong);
+      return { message: 'Song already exists', existingSongId: existingSong._id };
     }
+
+    console.log('Checking for album...');
+    let existingAlbum = await Album.findOne({title: album});
+
+    if (!existingAlbum) {
+      const albumId = await createAlbumFromFile(filePath);
+      existingAlbum = await Album.findById(albumId);
+    }
+
+    // If the artist didn't exist before this, it's already been created with the createAlbumFromFile function
+    let existingArtist = await Artist.findOne({name: artist});
+
+    if (!existingArtist) {
+      const artistId = await createArtistFromFile(filePath);
+      existingArtist = await Artist.findById(artistId);
+    }
+
+    const urlFriendlyAudioPath = filePath.replace(/\\/g, '/');
+    const newSong = new Song({
+      title,
+      artist: existingArtist._id,
+      album: existingAlbum._id,
+      albumCover: existingAlbum.albumCover,
+      audio: urlFriendlyAudioPath,
+      duration: metadata.format.duration,
+    });
+
+    const savedSong = await newSong.save();
+
+    existingAlbum.songs.push(savedSong._id);
+    await existingAlbum.save();
+    console.log('Song linked to album successfully!');
+    existingArtist.songs.push(savedSong._id);
+    await existingArtist.save();
+    console.log('Song linked to artist successfully!');
+    return { message: 'Song added successfully', songId: savedSong._id, artistId: existingArtist._id, albumId: existingAlbum._id };
+  } catch (error) {
+    console.error(`Error creating album from file ${filePath}:`, error.message);
+    throw error;
   }
+}
 
 module.exports = {
   createAlbumFromFile, importSongFromFile, createArtistFromFile

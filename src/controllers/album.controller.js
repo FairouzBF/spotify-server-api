@@ -1,3 +1,5 @@
+const fs = require('fs').promises;
+
 const Album = require('../models/album.model');
 const Artist = require('../models/artist.model');
 const Song = require('../models/song.model');
@@ -107,10 +109,21 @@ exports.deleteAlbum = async (req, res) => {
 
     // Store the linked songs
     const linkedSongs = album.songs;
+    const albumCover = album.albumCover;
 
     // Delete the linked songs
     if (linkedSongs && linkedSongs.length > 0) {
+      // Delete the associated files for each linked song
+      const songsToDelete = await Song.find({ _id: { $in: linkedSongs } });
+      for (const song of songsToDelete) {
+        await fs.unlink(song.audio);
+      }
+
       await Song.deleteMany({ _id: { $in: linkedSongs } });
+    }
+    // Delete the album cover
+    if (albumCover) {
+      await fs.unlink(albumCover);
     }
 
     // Delete the album from the database
