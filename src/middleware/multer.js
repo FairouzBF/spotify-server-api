@@ -11,6 +11,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage }).single('audio');
+//const upload = multer({ storage: storage }).single('audio');
+const upload = multer({ storage: storage }).array('audio', 10);
 
 module.exports = upload;

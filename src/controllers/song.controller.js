@@ -3,7 +3,7 @@ const Song = require('../models/song.model');
 const upload = require('../middleware/multer');
 const {importSongFromFile} = require('../utils/fileCreator');
 
-exports.addSong = async (req, res, next) => {
+/* exports.addSong = async (req, res, next) => {
   upload(req, res, async err => {
     if (err) {
       console.error('Multer error:', err);
@@ -21,6 +21,46 @@ exports.addSong = async (req, res, next) => {
       await fs.unlink(req.file.path);
       console.error(error);
       res.status(500).json({message: "Erreur lors de l'ajout de la chanson."});
+    }
+  });
+}; */
+
+exports.addSong = async (req, res, next) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(500).json({ message: 'Error during file upload.' });
+    }
+    try {
+      console.log('Received a request to add songs:', req.files);
+
+      if (req.files.length > 10) {
+        // If more than 10 files are uploaded, handle the error
+        return res.status(400).json({ message: 'Exceeded maximum number of allowed files (10).' });
+      }
+
+      const addedSongs = [];
+
+      // Loop through each file and process it
+      for (const file of req.files) {
+        const filePath = file.path;
+
+        // Use the importSongFromFile function to handle the song import
+        const addedSong = await importSongFromFile(filePath);
+        addedSongs.push(addedSong);
+      }
+
+      res.status(201).json(addedSongs);
+    } catch (error) {
+      console.error('Error while adding songs:', error);
+
+      // If an error occurs, remove all uploaded files
+      for (const file of req.files) {
+        await fs.unlink(file.path);
+      }
+
+      console.error(error);
+      res.status(500).json({ message: "Erreur lors de l'ajout des chansons." });
     }
   });
 };
