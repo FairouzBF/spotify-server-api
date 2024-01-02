@@ -49,10 +49,23 @@ exports.getAllArtists = async (req, res) => {
 };
 
 // GET: Récupérer un son par son ID
-exports.getArtistById = (req, res) => {
-  Artist.findById(req.params.id)
-    .then(artists => res.json(artists))
-    .catch(err => res.status(400).json('Error: ' + err));
+exports.getArtistById = async (req, res) => {
+  try {
+    const artist = await Artist.findById(req.params.id)
+      .populate({
+        path: 'albums',
+        select: 'title',
+      })
+      .populate({
+        path: 'songs',
+        select: 'title',
+      });
+
+    res.json(artist);
+  } catch (error) {
+    console.error('Error retrieving artist by ID:', error);
+    res.status(500).json({ message: 'Error retrieving artist by ID.' });
+  }
 };
 
 // POST: Ajouter un nouveau son
