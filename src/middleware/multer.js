@@ -2,16 +2,27 @@ const multer = require('multer');
 const path = require('path');
 
 // Configuration de Multer pour gérer les fichiers m4a
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './uploads/'); // Définissez le répertoire de destination pour les fichiers m4a
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Utilisez un nom de fichier unique basé sur la date
-    }
+const songStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
 });
 
 //const upload = multer({ storage: storage }).single('audio');
-const upload = multer({ storage: storage }).array('audio', 10);
+const songUpload = multer({storage: songStorage}).array('audio', 1000); //CHANGED TO 1000
 
-module.exports = upload;
+const coverStorage = multer.memoryStorage();
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only images are allowed.'), false);
+  }
+};
+
+const coverUpload = multer({storage: coverStorage, fileFilter}).single('albumCover');
+
+module.exports = {songUpload, coverUpload};

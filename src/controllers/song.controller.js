@@ -1,10 +1,10 @@
 const fs = require('fs').promises;
 const Song = require('../models/song.model');
-const upload = require('../middleware/multer');
+const songUpload = require('../middleware/multer');
 const {importSongFromFile} = require('../utils/fileCreator');
 
 exports.addSong = async (req, res, next) => {
-  upload(req, res, async (err) => {
+  songUpload(req, res, async (err) => {
     if (err) {
       console.error('Multer error:', err);
       return res.status(500).json({ message: 'Error during file upload.' });

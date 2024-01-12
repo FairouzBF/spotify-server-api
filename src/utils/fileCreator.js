@@ -12,8 +12,19 @@ async function saveImage(picture) {
   const imagePath = path.join(process.cwd(),  relativePath);
   await fs.writeFile(imagePath, picture.data);
   console.log('Cover saved successfully:', relativePath);
-
+  
   return relativePath;
+}
+
+async function editCover(picture) {
+  const fileExtension = path.extname(picture.originalname);
+  const fileName = `${Date.now()}${fileExtension}`;
+  const relativePath = path.join('covers', fileName);
+  const imagePath = path.join(process.cwd(),  relativePath);
+  await fs.writeFile(imagePath, picture.buffer);
+  console.log('Cover edited successfully:', relativePath);
+  const normalizedPath = relativePath.replace(/\\/g, '/');
+  return normalizedPath;
 }
 
 async function createArtistFromFile(file) {
@@ -153,5 +164,5 @@ async function importSongFromFile(filePath) {
 }
 
 module.exports = {
-  createAlbumFromFile, importSongFromFile, createArtistFromFile
+  createAlbumFromFile, importSongFromFile, createArtistFromFile, saveImage, editCover,
 };
