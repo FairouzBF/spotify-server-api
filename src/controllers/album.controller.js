@@ -16,7 +16,7 @@ exports.addAlbumFromFile = async (req, res) => {
       .status(200)
       .json({message: 'Artist created from file successfully', albumId});
   } catch (error) {
-    console.error('Error creating album from file:', error.message);
+    console.error('Error creating album from file - adding album to DB from file:', error.message);
     return res.status(500).json({error: 'Internal server error'});
   }
 };

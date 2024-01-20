@@ -6,11 +6,31 @@ const fs = require('fs').promises;
 const path = require('path');
 
 async function saveImage(picture) {
-  const extension = picture.format.split('/')[1];
+  if (!picture) {
+    // If picture is undefined, use a default image path
+    console.log('No picture provided, using default image...');
+    const defaultImagePath = path.join('src', 'assets', 'unknown.jpeg');
+
+    const newFileName = `${Date.now()}.jpeg`;
+    const newImagePath = path.join('covers', newFileName);
+
+    try {
+      // Copy the default image to a new file with the current date in the name
+      await fs.copyFile(defaultImagePath, newImagePath);
+      console.log('Default image copied successfully:', newImagePath);
+      return newImagePath;
+    } catch (error) {
+      console.error('Error copying default image:', error.message);
+      throw error;
+    }
+  }
+
+  console.log('Saving cover...');
+  const extension = picture[0].format.split('/')[1];
   const fileName = `${Date.now()}.${extension}`;
   const relativePath = path.join('covers', fileName);
   const imagePath = path.join(process.cwd(),  relativePath);
-  await fs.writeFile(imagePath, picture.data);
+  await fs.writeFile(imagePath, picture[0].data);
   console.log('Cover saved successfully:', relativePath);
   
   return relativePath;
@@ -32,7 +52,8 @@ async function createArtistFromFile(file) {
       const metadata = await mm.parseFile(file);
       console.log('Metadata:', metadata);
 
-      const existingArtist = await Artist.findOne({ name: metadata.common.artist });
+      const artistName = metadata.common.artist || 'Unknown artist';
+      const existingArtist = await Artist.findOne({ name: artistName });
 
       if (existingArtist) {
           console.error('Artist already exists:', existingArtist);
@@ -58,7 +79,8 @@ async function createArtistFromFile(file) {
 async function createAlbumFromFile(filePath) {
   try {
     const metadata = await mm.parseFile(filePath);
-    const existingAlbum = await Album.findOne({title: metadata.common.album});
+    const albumTitle = metadata.common.album || 'Unknown album';
+    const existingAlbum = await Album.findOne({title: albumTitle});
 
     if (existingAlbum) {
       console.error('Album already exists:', existingAlbum);
@@ -66,7 +88,7 @@ async function createAlbumFromFile(filePath) {
     }
 
     console.log(
-      `Album ${metadata.common.album} does not exist, adding it to the DB...`,
+      `Album ${albumTitle} does not exist, adding it to the DB...`,
     );
     
     console.log('Checking for artist...');
@@ -77,7 +99,7 @@ async function createAlbumFromFile(filePath) {
         `Artist ${metadata.common.artist} does not exist, adding them to the DB...`,
       );
       const newArtist = new Artist({
-        name: metadata.common.artist,
+        name: metadata.common.artist || 'Unknown artist',
       });
 
       existingArtist = await newArtist.save();
@@ -85,10 +107,11 @@ async function createAlbumFromFile(filePath) {
     }
 
     console.log('Adding the album to the DB...');
-    const albumCoverPath = await saveImage(metadata.common.picture[0]);
-    const urlFriendlyAlbumCoverPath = albumCoverPath.replace(/\\/g, '/');
+    const albumCoverPath = await saveImage(metadata.common.picture);
+    console.log("<!>ALBUM COVER PATH :<!>", albumCoverPath, metadata.common.picture);
+    const urlFriendlyAlbumCoverPath = albumCoverPath ? albumCoverPath.replace(/\\/g, '/') : null;
     const album = new Album({
-      title: metadata.common.album,
+      title: albumTitle,
       artist: existingArtist._id,
       releaseDate: metadata.common.year,
       songs: [],
@@ -104,7 +127,7 @@ async function createAlbumFromFile(filePath) {
 
     return album._id;
   } catch (error) {
-    console.error(`Error creating album from file ${filePath}:`, error.message);
+    console.error(`Error creating album from file ${filePath} - creating album from file:`, error.message);
     throw error;
   }
 }
@@ -112,10 +135,12 @@ async function createAlbumFromFile(filePath) {
 async function importSongFromFile(filePath) {
   try {
     const metadata = await mm.parseFile(filePath);
-    console.log('Reading metadata...', metadata.common);
+    console.log('Reading metadata...', metadata);
 
     const {title, artist, album} = metadata.common;
-    const existingSong = await Song.findOne({title: title});
+    const songTitle = title || path.basename(filePath, path.extname(filePath));
+
+    const existingSong = await Song.findOne({title: songTitle});
 
     if (existingSong) {
       console.error('Song already exists:', existingSong);
@@ -140,7 +165,7 @@ async function importSongFromFile(filePath) {
 
     const urlFriendlyAudioPath = filePath.replace(/\\/g, '/');
     const newSong = new Song({
-      title,
+      title: songTitle,
       artist: existingArtist._id,
       album: existingAlbum._id,
       albumCover: existingAlbum.albumCover,
@@ -158,7 +183,7 @@ async function importSongFromFile(filePath) {
     console.log('Song linked to artist successfully!');
     return { message: 'Song added successfully', songId: savedSong._id, artistId: existingArtist._id, albumId: existingAlbum._id };
   } catch (error) {
-    console.error(`Error creating album from file ${filePath}:`, error.message);
+    console.error(`Error creating album from file ${filePath} - importing song:`, error.message);
     throw error;
   }
 }

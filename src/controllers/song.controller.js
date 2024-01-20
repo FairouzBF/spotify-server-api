@@ -1,7 +1,22 @@
 const fs = require('fs').promises;
 const Song = require('../models/song.model');
-const songUpload = require('../middleware/multer');
+const {songUpload} = require('../middleware/multer');
 const {importSongFromFile} = require('../utils/fileCreator');
+
+const Ffmpeg = require('fluent-ffmpeg');
+
+async function convertToM4A(filePath) {
+  return new Promise((resolve, reject) => {
+    const outputFilePath = filePath.replace(/\..+$/, '.m4a');
+
+    Ffmpeg(filePath)
+      .audioCodec('aac')
+      .toFormat('ipod')
+      .on('end', () => resolve(outputFilePath))
+      .on('error', (err) => reject(new Error(`Error converting to WAV: ${err.message}`)))
+      .save(outputFilePath);
+  });
+}
 
 exports.addSong = async (req, res, next) => {
   songUpload(req, res, async (err) => {
@@ -12,9 +27,9 @@ exports.addSong = async (req, res, next) => {
     try {
       console.log('Received a request to add songs:', req.files);
 
-      if (req.files.length > 10) {
+      if (req.files.length > 1000) {
         // If more than 10 files are uploaded, handle the error
-        return res.status(400).json({ message: 'Exceeded maximum number of allowed files (10).' });
+        return res.status(400).json({ message: 'Exceeded maximum number of allowed files (1000).' });
       }
 
       const addedSongs = [];
@@ -23,9 +38,23 @@ exports.addSong = async (req, res, next) => {
       for (const file of req.files) {
         const filePath = file.path;
 
+        /* const wavFilePath = await convertToM4A(filePath);
+
         // Use the importSongFromFile function to handle the song import
-        const addedSong = await importSongFromFile(filePath);
-        addedSongs.push(addedSong);
+        const addedSong = await importSongFromFile(wavFilePath);
+        addedSongs.push(addedSong); */
+
+        const fileExtension = filePath.split('.').pop().toLowerCase();
+        if (fileExtension === 'm4a') {
+          // If already m4a, proceed with song import directly
+          const addedSong = await importSongFromFile(filePath);
+          addedSongs.push(addedSong);
+        } else {
+          // If not m4a, convert and then import
+          const m4aFilePath = await convertToM4A(filePath);
+          const addedSong = await importSongFromFile(m4aFilePath);
+          addedSongs.push(addedSong);
+        }
       }
 
       res.status(201).json(addedSongs);
