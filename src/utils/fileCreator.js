@@ -37,14 +37,19 @@ async function saveImage(picture) {
 }
 
 async function editCover(picture) {
-  const fileExtension = path.extname(picture.originalname);
-  const fileName = `${Date.now()}${fileExtension}`;
-  const relativePath = path.join('covers', fileName);
-  const imagePath = path.join(process.cwd(),  relativePath);
-  await fs.writeFile(imagePath, picture.buffer);
-  console.log('Cover edited successfully:', relativePath);
-  const normalizedPath = relativePath.replace(/\\/g, '/');
-  return normalizedPath;
+  try {
+    const fileExtension = path.extname(picture.originalname);
+    const fileName = `${Date.now()}${fileExtension}`;
+    const relativePath = path.join('covers', fileName);
+    const imagePath = path.join(process.cwd(), relativePath);
+    await fs.writeFile(imagePath, picture.buffer);
+    console.log('Cover edited successfully:', relativePath);
+    const normalizedPath = relativePath.replace(/\\/g, '/');
+    return normalizedPath;
+  } catch (error) {
+    console.error('Error editing cover:', error);
+    throw error; // Re-throw the error to be caught in the calling function
+  }
 }
 
 async function createArtistFromFile(file) {

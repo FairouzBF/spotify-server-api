@@ -110,6 +110,14 @@ exports.editAlbum = async (req, res) => {
     
     if (req.file) {
       updatedAlbum.albumCover = await editCover(req.file);
+      const updatedSongs = await Song.find({ album: updatedAlbum._id });
+
+      for (const song of updatedSongs) {
+        song.albumCover = updatedAlbum.albumCover;
+        await song.save();
+        console.log('Song updated successfully:', song);
+      }
+
       if (oldAlbumCoverPath) {
         await fs.unlink(oldAlbumCoverPath);
       }
