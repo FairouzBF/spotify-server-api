@@ -30,31 +30,19 @@ mongoose
   })
   .catch(err => console.log(err));
 
-const allowedOrigin =
+  const allowedOrigin =
   process.env.NODE_ENV === 'prod'
     ? 'https://dev-cloud-backoffice-spotify.vercel.app' // Update with your production URL
     : 'http://localhost:3000';
-
 // Use CORS middleware
 const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    // Check if the requesting origin is acceptable
-    const allowedOrigins = ['http://localhost:3000']; // Add your trusted origins here
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: allowedOrigin,
   credentials: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
   optionsSuccessStatus: 204,
 };
-app.options('*');
+app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
 // Other middleware and routes
