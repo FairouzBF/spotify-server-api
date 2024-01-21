@@ -43,7 +43,7 @@ const corsOptions = {
   allowedHeaders: 'Content-Type,Authorization',
   optionsSuccessStatus: 204,
 };
-app.options('*', cors(corsOptions));
+app.options('*');
 app.use(cors(corsOptions));
 
 // Other middleware and routes
