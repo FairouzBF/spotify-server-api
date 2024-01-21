@@ -82,12 +82,12 @@ exports.addArtist = (req, res) => {
 // PUT: Mettre à jour un son par son ID
 exports.editArtist = (req, res) => {
   Artist.findById(req.params.id)
-    .then(artists => {
-      artists.name = req.body.name;
+    .then(artist => {
+      artist.name = req.body.name;
       // Mettez à jour d'autres champs au besoin
-      artists
+      artist
         .save()
-        .then(() => res.json('Artist updated!'))
+        .then(() => res.json(artist))
         .catch(err => res.status(400).json('Error: ' + err));
     })
     .catch(err => res.status(400).json('Error: ' + err));

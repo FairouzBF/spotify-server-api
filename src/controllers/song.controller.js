@@ -27,9 +27,9 @@ exports.addSong = async (req, res, next) => {
     try {
       console.log('Received a request to add songs:', req.files);
 
-      if (req.files.length > 1000) {
+      if (req.files.length > 10000) {
         // If more than 10 files are uploaded, handle the error
-        return res.status(400).json({ message: 'Exceeded maximum number of allowed files (1000).' });
+        return res.status(400).json({ message: 'Exceeded maximum number of allowed files (10000).' });
       }
 
       const addedSongs = [];
@@ -37,12 +37,6 @@ exports.addSong = async (req, res, next) => {
       // Loop through each file and process it
       for (const file of req.files) {
         const filePath = file.path;
-
-        /* const wavFilePath = await convertToM4A(filePath);
-
-        // Use the importSongFromFile function to handle the song import
-        const addedSong = await importSongFromFile(wavFilePath);
-        addedSongs.push(addedSong); */
 
         const fileExtension = filePath.split('.').pop().toLowerCase();
         if (fileExtension === 'm4a') {
@@ -153,7 +147,6 @@ exports.editSong = (req, res) => {
   Song.findById(req.params.id)
     .then(song => {
       song.title = req.body.title;
-      song.artist = req.body.artist;
       song.genre = req.body.genre;
       // Mettez à jour d'autres champs au besoin
       song

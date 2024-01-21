@@ -68,7 +68,7 @@ async function createAlbum(filePath, artist) {
     const album = new Album({
       title: metadata.common.album,
       artist: artist._id,
-      releaseDate: metadata.common.year,
+      date: metadata.common.date,
       songs: [],
     });
 

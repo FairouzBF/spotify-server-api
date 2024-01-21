@@ -113,7 +113,7 @@ async function createAlbumFromFile(filePath) {
     const album = new Album({
       title: albumTitle,
       artist: existingArtist._id,
-      releaseDate: metadata.common.year,
+      date: metadata.common.date,
       songs: [],
       albumCover: urlFriendlyAlbumCoverPath,
     });

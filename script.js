@@ -2,6 +2,7 @@ const fs = require('fs').promises;
 const mongoose = require('mongoose');
 const path = require('path');
 const { importSongFromFile } = require('./src/utils/fileCreator');
+const {songUpload} = require('./src/middleware/multer');
 
 mongoose
   .connect(
@@ -23,7 +24,7 @@ mongoose
     console.log('Connected to the database');
   
     // Call your function to upload audio files after the database connection is established
-    uploadAudioFilesFromDirectory('./Music');
+    uploadAudioFilesFromDirectory('../Music');
   });
 
 async function walkSync(dir, filelist = []) {
@@ -53,7 +54,17 @@ async function uploadAudioFilesFromDirectory(directoryPath) {
 
     for (const file of validAudioFiles) {
       console.log('Processing file:', file);
-      await importSongFromFile(file);
+      // Generate a new filename using Date.now()
+      const newFileName = Date.now() + path.extname(file);
+      // Create the destination path in the './uploads' folder
+      const destinationPath = path.join('./uploads', newFileName);
+
+      // Copy the file to the './uploads' folder
+      await fs.copyFile(file, destinationPath);
+
+      // Now, use the destination path to import the song
+      console.log('Importing song from file:', destinationPath);
+      await importSongFromFile(destinationPath);
     }
 
     console.log('Finished processing audio files');

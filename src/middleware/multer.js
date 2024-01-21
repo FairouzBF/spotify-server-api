@@ -12,7 +12,7 @@ const songStorage = multer.diskStorage({
 });
 
 //const upload = multer({ storage: storage }).single('audio');
-const songUpload = multer({storage: songStorage}).array('audio', 1000); //CHANGED TO 1000
+const songUpload = multer({storage: songStorage}).array('audio', 10000); //CHANGED TO 1000
 
 const coverStorage = multer.memoryStorage();
 const fileFilter = (req, file, cb) => {

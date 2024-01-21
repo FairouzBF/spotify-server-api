@@ -24,7 +24,7 @@ exports.addAlbumFromFile = async (req, res) => {
 // CREATE (ajouter un album)
 exports.addAlbum = async (req, res) => {
   try {
-    const {title, artist, releaseDate} = req.body;
+    const {title, artist, date} = req.body;
 
     let existingArtist = await Artist.findOne({name: artist});
 
@@ -38,7 +38,7 @@ exports.addAlbum = async (req, res) => {
     const newAlbum = new Album({
       title,
       artist: existingArtist,
-      releaseDate,
+      date,
     });
 
     // Enregistrez l'album dans la base de données
@@ -92,11 +92,11 @@ exports.getAlbumById = async (req, res) => {
 exports.editAlbum = async (req, res) => {
   try {
     console.log('Album ID:', req.params.id);
-    const { title, releaseDate } = req.body;
+    const { title, date } = req.body;
     console.log('Request body:', req.body);
     const updatedAlbum = await Album.findById(req.params.id);
 
-    if (!title && releaseDate === undefined && !req.file) {
+    if (!title && date === undefined && !req.file) {
       return res.status(400).json({message: 'No data provided'});
     }
     if (!updatedAlbum) {
@@ -106,7 +106,7 @@ exports.editAlbum = async (req, res) => {
     const oldAlbumCoverPath = updatedAlbum.albumCover;
 
     updatedAlbum.title = title || updatedAlbum.title;
-    updatedAlbum.releaseDate = releaseDate !== undefined ? new Date(releaseDate) : updatedAlbum.releaseDate;
+    updatedAlbum.date = date !== undefined ? date : updatedAlbum.date;
     
     if (req.file) {
       updatedAlbum.albumCover = await editCover(req.file);
@@ -115,13 +115,14 @@ exports.editAlbum = async (req, res) => {
       }
     }
     const savedAlbum = await updatedAlbum.save();
+    console.log('Album updated successfully:', savedAlbum);
 
     res.json(savedAlbum);
   } catch (error) {
-    console.error("Erreur lors de la mise à jour d'un album :", error);
+    console.error("Error while updating an album :", error);
     res
       .status(500)
-      .json({message: "Erreur lors de la mise à jour d'un album."});
+      .json({message: "Error while updating an album."});
   }
 };
 
