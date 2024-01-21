@@ -13,23 +13,27 @@ async function convertToM4A(filePath) {
       .audioCodec('aac')
       .toFormat('ipod')
       .on('end', () => resolve(outputFilePath))
-      .on('error', (err) => reject(new Error(`Error converting to WAV: ${err.message}`)))
+      .on('error', err =>
+        reject(new Error(`Error converting to WAV: ${err.message}`)),
+      )
       .save(outputFilePath);
   });
 }
 
 exports.addSong = async (req, res, next) => {
-  songUpload(req, res, async (err) => {
+  songUpload(req, res, async err => {
     if (err) {
       console.error('Multer error:', err);
-      return res.status(500).json({ message: 'Error during file upload.' });
+      return res.status(500).json({message: 'Error during file upload.'});
     }
     try {
       console.log('Received a request to add songs:', req.files);
 
       if (req.files.length > 10000) {
         // If more than 10 files are uploaded, handle the error
-        return res.status(400).json({ message: 'Exceeded maximum number of allowed files (10000).' });
+        return res
+          .status(400)
+          .json({message: 'Exceeded maximum number of allowed files (10000).'});
       }
 
       const addedSongs = [];
@@ -61,7 +65,7 @@ exports.addSong = async (req, res, next) => {
       }
 
       console.error(error);
-      res.status(500).json({ message: "Erreur lors de l'ajout des chansons." });
+      res.status(500).json({message: "Erreur lors de l'ajout des chansons."});
     }
   });
 };
@@ -161,9 +165,9 @@ exports.deleteSong = async (req, res) => {
   try {
     // Find the song to get its file path
     const song = await Song.findById(req.params.id);
-    
+
     if (!song) {
-      return res.status(404).json({ message: 'Song not found' });
+      return res.status(404).json({message: 'Song not found'});
     }
 
     // Delete the associated file
@@ -172,9 +176,73 @@ exports.deleteSong = async (req, res) => {
     // Delete the song from the database
     await Song.findByIdAndDelete(req.params.id);
 
-    res.json({ message: 'Song deleted successfully: ', deletedSongTitle: song.title });
+    res.json({
+      message: 'Song deleted successfully: ',
+      deletedSongTitle: song.title,
+    });
   } catch (err) {
     console.error('Error deleting song:', err);
-    res.status(500).json({ message: 'Error deleting song', error: err.message });
+    res.status(500).json({message: 'Error deleting song', error: err.message});
+  }
+};
+
+exports.getSongCount = async (req, res) => {
+  try {
+    const songCount = await Song.countDocuments();
+    res.json({songCount});
+  } catch (error) {
+    console.error('Error getting song count:', error);
+    res.status(500).json({error: 'Internal server error'});
+  }
+};
+
+exports.incrementListens = async (req, res) => {
+  try {
+    const songId = req.params.id;
+
+    // Find the song by ID
+    const song = await Song.findById(songId);
+
+    if (!song) {
+      return res.status(404).json({message: 'Song not found'});
+    }
+
+    // Increment the number of listens
+    song.numberOfListens += 1;
+
+    // Save the updated song
+    const updatedSong = await song.save();
+
+    res.json({numberOfListens: updatedSong.numberOfListens});
+  } catch (error) {
+    console.error('Error incrementing number of listens:', error);
+    res.status(500).json({error: 'Internal server error'});
+  }
+};
+
+exports.getSongListens = async (req, res) => {
+  Song.findById(req.params.id)
+    .then(song => res.json(song.numberOfListens))
+    .catch(err => res.status(400).json('Error: ' + err));
+};
+
+exports.getTotalListens = async (req, res) => {
+  try {
+    const totalListens = await Song.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalListens: { $sum: '$numberOfListens' },
+        },
+      },
+    ]);
+
+    // Extract the totalListens value from the result
+    const result = totalListens.length > 0 ? totalListens[0].totalListens : 0;
+
+    res.json({ totalListens: result });
+  } catch (error) {
+    console.error('Error getting total listens:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

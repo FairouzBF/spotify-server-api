@@ -6,6 +6,7 @@ const { coverUpload } = require('../middleware/multer');
 
 router.get('/cover/:id', albumController.getAlbumCover);
 router.get('/', albumController.getAllAlbums);
+router.get('/album-count', albumController.getAlbumCount);
 router.get('/:id', albumController.getAlbumById);
 router.post('/', authMiddleware, albumController.addAlbum);
 router.post('/file', authMiddleware, albumController.addAlbumFromFile);

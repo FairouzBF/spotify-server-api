@@ -200,3 +200,13 @@ exports.getAlbumCover = async (req, res) => {
     res.status(500).json({error: 'Internal server error'});
   }
 };
+
+exports.getAlbumCount = async (req, res) => {
+  try {
+    const albumCount = await Album.countDocuments();
+    res.json({ albumCount });
+  } catch (error) {
+    console.error('Error getting album count:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
