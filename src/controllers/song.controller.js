@@ -147,11 +147,10 @@ exports.editSong = (req, res) => {
   Song.findById(req.params.id)
     .then(song => {
       song.title = req.body.title;
-      song.genre = req.body.genre;
       // Mettez à jour d'autres champs au besoin
       song
         .save()
-        .then(() => res.json('Song updated!'))
+        .then(() => res.json(song))
         .catch(err => res.status(400).json('Error: ' + err));
     })
     .catch(err => res.status(400).json('Error: ' + err));
